@@ -1,0 +1,13 @@
+from dataguzzler_python import dgpy
+import spatialnde2 as snde
+
+include(dgpy,"dgpy_startup.dpi") # If you get a NameError here, be sure you are executing this file with dataguzzler-python
+
+include(dgpy,"matplotlib.dpi")
+
+include(snde,"recdb.dpi")
+include(snde,"recdb_gui.dpi")
+
+import dgpython_opencv_camera as cam
+
+CAM = cam.Camera("CAM", recdb, 0)

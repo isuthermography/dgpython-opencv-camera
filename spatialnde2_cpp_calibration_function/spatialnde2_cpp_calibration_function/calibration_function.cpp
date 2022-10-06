@@ -4,13 +4,14 @@
 {
     "distutils": {
         "depends": [
-            "C:\\Users\\lesthatj\\.conda\\envs\\rxcalab\\lib\\site-packages\\spatialnde2-0.4.0+192.gacc1f1f.modified-py3.8-win-amd64.egg\\spatialnde2\\snde\\recmath.hpp",
+            "C:\\Users\\lesthatj\\.conda\\envs\\rxcalab\\lib\\site-packages\\spatialnde2-0.4.0+199.gb6015b7.modified-py3.8-win-amd64.egg\\spatialnde2\\snde\\recmath.hpp",
             "spatialnde2_cpp_calibration_function\\calibration_function_cpp.hpp"
         ],
         "extra_compile_args": [
             "/Od",
             "/Zi",
             "/GS",
+            "-DSPATIALNDE2_SET_THREAD_NAMES_WIN32",
             "-DSNDE_WIN32_SHMEM_SIZE=4294967296ull",
             "-D_SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING",
             "-DSIZEOF_SIZE_T_IS_8",
@@ -38,7 +39,7 @@
         ],
         "include_dirs": [
             ".\\spatialnde2_cpp_calibration_function",
-            "C:\\Users\\lesthatj\\.conda\\envs\\rxcalab\\lib\\site-packages\\spatialnde2-0.4.0+192.gacc1f1f.modified-py3.8-win-amd64.egg\\spatialnde2",
+            "C:\\Users\\lesthatj\\.conda\\envs\\rxcalab\\lib\\site-packages\\spatialnde2-0.4.0+199.gb6015b7.modified-py3.8-win-amd64.egg\\spatialnde2",
             "C:/workdir/dataguzzler_work_dir/temp/spatialnde2/build/include",
             "C:/workdir/dataguzzler_work_dir/temp/spatialnde2/.",
             "C:/Users/lesthatj/.conda/envs/rxcalab/Library/include",
@@ -61,8 +62,8 @@
         "libraries": [
             "spatialnde2",
             "spatialnde2",
-            "hdf5-shared",
-            "hdf5_cpp-shared",
+            "hdf5",
+            "hdf5_cpp",
             "spatialnde2_ocl",
             "spatialnde2_osg",
             "spatialnde2_qt",
@@ -70,7 +71,7 @@
             "opencv_calib3d460"
         ],
         "library_dirs": [
-            "C:\\Users\\lesthatj\\.conda\\envs\\rxcalab\\lib\\site-packages\\spatialnde2-0.4.0+192.gacc1f1f.modified-py3.8-win-amd64.egg\\spatialnde2",
+            "C:\\Users\\lesthatj\\.conda\\envs\\rxcalab\\lib\\site-packages\\spatialnde2-0.4.0+199.gb6015b7.modified-py3.8-win-amd64.egg\\spatialnde2",
             "C:/Users/lesthatj/.conda/envs/rxcalab/Library/lib"
         ],
         "name": "spatialnde2_cpp_calibration_function.calibration_function",

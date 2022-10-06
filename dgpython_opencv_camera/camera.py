@@ -98,7 +98,7 @@ class OpenCVCamera(object, metaclass=dgpy_Module):
 
         # We need to add an initial frame to get the data type or else the averaging math channel will fail because it will see the null pointer
         transact = self.recdb.start_transaction()
-        rec = snde.create_recording_ref(self.recdb, self.chanptr, self.recdb.raw(), snde.SNDE_RTN_UINT8)
+        rec = snde.create_ndarray_ref(self.recdb, self.chanptr, self.recdb.raw(), snde.SNDE_RTN_UINT8)
         globalrev = self.recdb.end_transaction(transact)
         rec.rec.metadata = snde.immutable_metadata()
         rec.rec.metadata.AddMetaDatum(snde.metadatum_str('nde_array-axis0_coord', 'Y Position'))
@@ -153,7 +153,7 @@ class OpenCVCamera(object, metaclass=dgpy_Module):
                 ret, frame = vid.read()
                 if ret:
                     transact = self.recdb.start_transaction()
-                    rec = snde.create_recording_ref(self.recdb, self.chanptr, self.recdb.raw(), snde.SNDE_RTN_UINT8)
+                    rec = snde.create_ndarray_ref(self.recdb, self.chanptr, self.recdb.raw(), snde.SNDE_RTN_UINT8)
                     globalrev = self.recdb.end_transaction(transact)
                     rec.rec.metadata = snde.immutable_metadata()
                     rec.rec.metadata.AddMetaDatum(snde.metadatum_str('nde_array-axis0_coord', 'Y Position'))

@@ -115,7 +115,7 @@ class OpenCVCalibration(object, metaclass=dgpy_Module):
         finally:
             mon.close(self.recdb)
 
-        rec = rev.get_recording_ref(self.camchannel)
+        rec = rev.get_ndarray_ref(self.camchannel)
         self.brightfield = rec.data()
         return True
 
@@ -126,7 +126,7 @@ class OpenCVCalibration(object, metaclass=dgpy_Module):
         finally:
             mon.close(self.recdb)
 
-        rec = rev.get_recording_ref(self.camchannel)
+        rec = rev.get_ndarray_ref(self.camchannel)
         self.darkfield = rec.data()
         return True
 
@@ -141,7 +141,7 @@ class OpenCVCalibration(object, metaclass=dgpy_Module):
         finally:
             mon.close(self.recdb)
 
-        rec = rev.get_recording_ref(self.camchannel)
+        rec = rev.get_ndarray_ref(self.camchannel)
 
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(self.objpoints, self.imgpoints, self.checkershape[::-1], None, None)
 
@@ -172,7 +172,7 @@ class OpenCVCalibration(object, metaclass=dgpy_Module):
         finally:
             mon.close(self.recdb)
 
-        rec = rev.get_recording_ref(self.camchannel)
+        rec = rev.get_ndarray_ref(self.camchannel)
         img = rec.data()
 
         if img.dtype.fields != None and all(elem in img.dtype.fields for elem in ['r','g','b']):

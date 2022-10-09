@@ -83,6 +83,7 @@ namespace snde2_fn_ex {
       snde::snde_debug(SNDE_DC_APP,"define_recs()");
       // Use of "this" in the next line for the same reason as the typedefs, above
       std::shared_ptr<snde::multi_ndarray_recording> result_rec = snde::create_recording_math<snde::multi_ndarray_recording>(this->get_result_channel_path(0),this->rss,1);
+      result_rec->define_array(0, SNDE_RTN_UINT16, "calibimg");
       // ***!!! Should provide means to set allocation manager !!!***
       
       return std::make_shared<metadata_function_override_type>([ this,result_rec,recording,calibrec ]() {
@@ -128,7 +129,7 @@ namespace snde2_fn_ex {
       cv::Vec<snde_float32, 14> dist((snde_float32*)calibrec->void_shifted_arrayptr("cam_dist"));
 
       cv::Mat newmtx = copyparamstocvmat<snde_float32>(calibrec, "cam_newmtx");
-      cv::Mat cvin = copyparamstocvmat<uint8_t>(recording, 0);
+      cv::Mat cvin = copyparamstocvmat<uint16_t>(recording, 0);
       
       cv::Mat cvout;
 
@@ -139,7 +140,7 @@ namespace snde2_fn_ex {
 
       for (size_t i=0; i < w; i++) {
         for (size_t j=0; j< h; j++) {
-          *(uint8_t*)result_rec->element_dataptr(0, {i,j}) = cvout.at<uint8_t>(i,j);
+          *(uint16_t*)result_rec->element_dataptr(0, {i,j}) = cvout.at<uint16_t>(i,j);
         }
       }
       

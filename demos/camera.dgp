@@ -42,15 +42,16 @@ recdb.add_math_function(avgcam, False)
 
 transact.end_transaction()
 
-input("Press Enter")
-
 calib = cammodule.Calibration("/CAMERA0/GRAY/AVG/CALIBPARAMS", recdb, '/CAMERA0/GRAY/AVG', 9, 6)
+
+input("Press Enter")
 
 transact = recdb.start_transaction()
 
 calibcam = calibration_function.instantiate(
     [snde.math_parameter_recording("/CAMERA0/GRAY/AVG"), 
-    snde.math_parameter_recording("/CAMERA0/GRAY/AVG/CALIBPARAMS")], 
+    snde.math_parameter_recording("/CAMERA0/GRAY/AVG/CALIBPARAMS"),
+    snde.math_parameter_bool_const(True)], 
     [snde.shared_string("CALIB")], "/CAMERA0/GRAY/AVG/", False, False, False, 
     snde.math_definition("Calibrated Camera Channel"), None)
 

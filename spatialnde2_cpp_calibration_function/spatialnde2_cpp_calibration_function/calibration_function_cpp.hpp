@@ -59,43 +59,43 @@ namespace snde2_fn_ex {
 
 
   
-
-  class calibration_function: public snde::recmath_cppfuncexec<std::shared_ptr<snde::multi_ndarray_recording>,std::shared_ptr<snde::multi_ndarray_recording>>
+  template <typename T>
+  class camera_calibration: public snde::recmath_cppfuncexec<std::shared_ptr<snde::multi_ndarray_recording>,std::shared_ptr<snde::multi_ndarray_recording>,snde_bool>
   {
   public:
-    calibration_function(std::shared_ptr<snde::recording_set_state> rss,std::shared_ptr<snde::instantiated_math_function> inst) :
-      snde::recmath_cppfuncexec<std::shared_ptr<snde::multi_ndarray_recording>,std::shared_ptr<snde::multi_ndarray_recording>>(rss,inst)
+      camera_calibration(std::shared_ptr<snde::recording_set_state> rss,std::shared_ptr<snde::instantiated_math_function> inst) :
+      snde::recmath_cppfuncexec<std::shared_ptr<snde::multi_ndarray_recording>,std::shared_ptr<snde::multi_ndarray_recording>,snde_bool>(rss,inst)
     {
       
     }
     
     // These typedefs are regrettably necessary and will need to be updated according to the parameter signature of your function
     // https://stackoverflow.com/questions/1120833/derived-template-class-access-to-base-class-member-data
-    typedef typename snde::recmath_cppfuncexec<std::shared_ptr<snde::multi_ndarray_recording>,std::shared_ptr<snde::multi_ndarray_recording>>::metadata_function_override_type metadata_function_override_type;
-    typedef typename snde::recmath_cppfuncexec<std::shared_ptr<snde::multi_ndarray_recording>,std::shared_ptr<snde::multi_ndarray_recording>>::lock_alloc_function_override_type lock_alloc_function_override_type;
-    typedef typename snde::recmath_cppfuncexec<std::shared_ptr<snde::multi_ndarray_recording>,std::shared_ptr<snde::multi_ndarray_recording>>::exec_function_override_type exec_function_override_type;
+    typedef typename snde::recmath_cppfuncexec<std::shared_ptr<snde::multi_ndarray_recording>,std::shared_ptr<snde::multi_ndarray_recording>,snde_bool>::metadata_function_override_type metadata_function_override_type;
+    typedef typename snde::recmath_cppfuncexec<std::shared_ptr<snde::multi_ndarray_recording>,std::shared_ptr<snde::multi_ndarray_recording>,snde_bool>::lock_alloc_function_override_type lock_alloc_function_override_type;
+    typedef typename snde::recmath_cppfuncexec<std::shared_ptr<snde::multi_ndarray_recording>,std::shared_ptr<snde::multi_ndarray_recording>,snde_bool>::exec_function_override_type exec_function_override_type;
 
     // just using the default for decide_new_revision and compute_options
     
-    std::shared_ptr<metadata_function_override_type> define_recs(std::shared_ptr<snde::multi_ndarray_recording> recording, std::shared_ptr<snde::multi_ndarray_recording> calibrec) 
+    std::shared_ptr<metadata_function_override_type> define_recs(std::shared_ptr<snde::multi_ndarray_recording> recording, std::shared_ptr<snde::multi_ndarray_recording> calibrec, snde_bool crop)
     {
       // define_recs code
       snde::snde_debug(SNDE_DC_APP,"define_recs()");
       // Use of "this" in the next line for the same reason as the typedefs, above
       std::shared_ptr<snde::multi_ndarray_recording> result_rec = snde::create_recording_math<snde::multi_ndarray_recording>(this->get_result_channel_path(0),this->rss,1);
-      result_rec->define_array(0, SNDE_RTN_UINT16, "calibimg");
+      result_rec->define_array(0, recording->ndinfo(0)->typenum, "calibimg");
       // ***!!! Should provide means to set allocation manager !!!***
       
-      return std::make_shared<metadata_function_override_type>([ this,result_rec,recording,calibrec ]() {
+      return std::make_shared<metadata_function_override_type>([ this,result_rec,recording,calibrec,crop]() {
 	// metadata code
-	std::unordered_map<std::string,snde::metadatum> metadata;
 	snde::snde_debug(SNDE_DC_APP,"metadata()");
-	metadata.emplace("Test_metadata_entry",snde::metadatum("Test_metadata_entry",3.14));
 	
-	result_rec->metadata=std::make_shared<snde::immutable_metadata>(metadata);
+
+    std::shared_ptr<snde::constructible_metadata> metadata;
+    result_rec->metadata = snde::MergeMetadata(metadata, recording->metadata);
 	result_rec->mark_metadata_done();
 	
-	return std::make_shared<lock_alloc_function_override_type>([ this,result_rec,recording,calibrec ]() {
+	return std::make_shared<lock_alloc_function_override_type>([ this,result_rec,recording,calibrec,crop]() {
 	  // lock_alloc code
 	  
 	  result_rec->allocate_storage(0, recording->layouts.at(0).dimlen);
@@ -122,14 +122,14 @@ namespace snde2_fn_ex {
 	  
 
 	  
-	  return std::make_shared<exec_function_override_type>([ this,locktokens,result_rec,recording,calibrec ]() {
+	  return std::make_shared<exec_function_override_type>([ this,locktokens,result_rec,recording,calibrec,crop]() {
 	    // exec code
 	    
       cv::Mat mtx = copyparamstocvmat<snde_float32>(calibrec, "cam_mtx");
       cv::Vec<snde_float32, 14> dist((snde_float32*)calibrec->void_shifted_arrayptr("cam_dist"));
 
       cv::Mat newmtx = copyparamstocvmat<snde_float32>(calibrec, "cam_newmtx");
-      cv::Mat cvin = copyparamstocvmat<uint16_t>(recording, 0);
+      cv::Mat cvin = copyparamstocvmat<T>(recording, 0);
       
       cv::Mat cvout;
 
@@ -140,7 +140,7 @@ namespace snde2_fn_ex {
 
       for (size_t i=0; i < w; i++) {
         for (size_t j=0; j< h; j++) {
-          *(uint16_t*)result_rec->element_dataptr(0, {i,j}) = cvout.at<uint16_t>(i,j);
+          *(T*)result_rec->element_dataptr(0, {i,j}) = cvout.at<T>(i,j);
         }
       }
       
@@ -163,14 +163,25 @@ namespace snde2_fn_ex {
   };
 
 
-
-  
   
   std::shared_ptr<snde::math_function> define_calibration_function()
   {
-    return std::make_shared<snde::cpp_math_function>([] (std::shared_ptr<snde::recording_set_state> rss,std::shared_ptr<snde::instantiated_math_function> inst) {
-      return std::make_shared<calibration_function>(rss,inst);
-    });
+      std::shared_ptr<snde::math_function> newfunc = std::make_shared<snde::cpp_math_function>([](std::shared_ptr<snde::recording_set_state> rss, std::shared_ptr<snde::instantiated_math_function> inst) {
+          std::shared_ptr<snde::executing_math_function> executing;
+
+          executing = snde::make_cppfuncexec_integertypes<camera_calibration>(rss, inst);
+          if (!executing) {
+              executing = snde::make_cppfuncexec_floatingtypes<camera_calibration>(rss, inst);
+          }
+
+          if (!executing) {
+              throw snde::snde_error("In attempting to call math function %s, first parameter has unsupported data type.", inst->definition->definition_command.c_str());
+          }
+          return executing;
+          });
+      //newfunc->self_dependent=true;
+      newfunc->new_revision_optional = true;
+      return newfunc;
     
   }
 

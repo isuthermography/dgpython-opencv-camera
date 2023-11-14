@@ -8,6 +8,67 @@ include(dgpy,"matplotlib.dpi")
 include(snde,"recdb.dpi")
 include(snde,"recdb_gui.dpi")
 
-import dgpython_opencv_camera as cam
+import dgpython_opencv_camera as cammodule
+import cv2
 
-CAM = cam.Camera("CAM", recdb, 0)
+from spatialnde2_cpp_calibration_function import calibration_function
+
+input("Press Enter")
+
+transact = recdb.start_transaction()
+
+cameragroup = recdb.define_channel("/CAMERA0/","main",recdb.raw())
+
+transact.end_transaction()
+
+
+cam = cammodule.Camera("/CAMERA0/LIVE", recdb, 0, cv2.CAP_DSHOW, True)
+
+
+transact = recdb.start_transaction()
+
+
+
+rgbacam = snde.numpy_bgrtorgba.instantiate(
+    [snde.math_parameter_recording("/CAMERA0/LIVE")], 
+    [snde.shared_string("RGBA")], "/CAMERA0/", False, False, False,
+    snde.math_definition("Convert Raw Camera Frames to RGBA"), None)
+
+graygroup = recdb.define_channel("/CAMERA0/GRAY/","main",recdb.raw())
+
+graycam = snde.numpy_bgrtogray16.instantiate(
+    [snde.math_parameter_recording("/CAMERA0/LIVE")], [snde.shared_string("LIVE")],
+    "/CAMERA0/GRAY/", False, False, False, 
+    snde.math_definition("Convert Raw Camera Frames to 16-bit Grayscale"), None)
+
+avgcam = snde.averaging_downsampler.instantiate(
+    [snde.math_parameter_recording("/CAMERA0/GRAY/LIVE"), 
+    snde.math_parameter_unsigned_const(16), 
+    snde.math_parameter_bool_const(False)], [snde.shared_string("AVG")],
+    "/CAMERA0/GRAY/", False, False, False, 
+    snde.math_definition("16 Averages of Camera Grayscale Channel"), None)
+
+recdb.add_math_function(rgbacam, False)
+recdb.add_math_function(graycam, False)
+recdb.add_math_function(avgcam, False)
+
+transact.end_transaction()
+
+calib = cammodule.Calibration("/CAMERA0/GRAY/CALIBPARAMS", recdb, '/CAMERA0/GRAY/AVG', 9, 6)
+
+
+
+transact = recdb.start_transaction()
+
+calibcam = calibration_function.instantiate(
+    [snde.math_parameter_recording("/CAMERA0/GRAY/AVG"), 
+    snde.math_parameter_recording("/CAMERA0/GRAY/CALIBPARAMS"),
+    snde.math_parameter_bool_const(True)], 
+    [snde.shared_string("LIVECALIB")], "/CAMERA0/GRAY/", False, False, False, 
+    snde.math_definition("Calibrated Camera Channel"), None)
+
+recdb.add_math_function(calibcam, False)
+
+transact.end_transaction()
+
+

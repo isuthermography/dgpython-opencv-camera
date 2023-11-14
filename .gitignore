@@ -10,3 +10,4 @@ dist/
 *.pdb
 *.pyd
 *.c
+spatialnde2_cpp_calibration_function/spatialnde2_cpp_calibration_function/calibration_function.cpp
